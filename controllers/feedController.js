@@ -1,9 +1,22 @@
+const feedModel = require("../models/feedModel");
+
 exports.getPost = (req, res, next) => {
-  res.status(200).json({
-    title: "feed1",
-    content: "content: feed1",
-    createdBy: "Sree",
-  });
+  let totalItems;
+  feedModel
+    .find()
+    .countDocuments()
+    .then((counts) => {
+      totalItems = counts;
+      return feedModel.find();
+      // console.log(counts);
+    })
+    .then((posts) => {
+      res.status(201).json({
+        message: "Fetched posts successfully.",
+        posts: posts,
+        totalItems: totalItems,
+      });
+    });
 };
 
 exports.createPost = (req, res, next) => {
@@ -12,10 +25,21 @@ exports.createPost = (req, res, next) => {
   const createdBy = req.body.createdBy;
   const id = Math.random();
 
-  res.status(201).json({
-    id: id,
+  const feed = new feedModel({
     title: title,
     content: content,
-    createdBy: createdBy,
   });
+  feed
+    .save()
+    .then(() => {
+      res.status(201).json({
+        id: id,
+        title: title,
+        content: content,
+        createdBy: createdBy,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

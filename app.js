@@ -1,10 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-mongoose.set("strictQuery", true);
 
 const feedRoutes = require("./routes/feed");
-// const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/auth");
 
 const MONGODB_URI =
   "mongodb+srv://root:root@cluster0.inbf1sx.mongodb.net/newsfeedmongoose";
@@ -24,7 +23,9 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRoutes);
-// app.use("/auth", authRoutes);
+app.use("/auth", authRoutes);
+
+mongoose.set("strictQuery", true);
 
 mongoose
   .connect(MONGODB_URI)
