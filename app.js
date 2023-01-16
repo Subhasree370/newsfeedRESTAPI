@@ -25,6 +25,14 @@ app.use((req, res, next) => {
 app.use("/feed", feedRoutes);
 app.use("/auth", authRoutes);
 
+app.use((error, req, res, next) => {
+  console.log(error.message);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  const data = error.data;
+  res.status(status).json({ message: message, data: data });
+});
+
 mongoose.set("strictQuery", true);
 
 mongoose
