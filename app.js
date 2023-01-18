@@ -44,10 +44,11 @@ mongoose
     console.log(err);
   });
 
+// PUT /feed/post/:postId
+
 // GET /feed/posts
 // POST /feed/posts
-// GET /feed/post/:postId
-// PUT /feed/post/:postId
-// DELETE /feed/post/:postId
 // POST /auth/signup
 // POST /auth/login
+// GET /feed/post/:postId
+// DELETE /feed/post/:postId

@@ -1,5 +1,7 @@
+const { response } = require("express");
 const feedModel = require("../models/feedModel");
 const userModel = require("../models/userModel");
+const { validationResult } = require("express-validator"); //named export
 
 exports.getPost = (req, res, next) => {
   let totalItems;
@@ -33,6 +35,14 @@ exports.getPost = (req, res, next) => {
 };
 
 exports.createPost = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+
   const title = req.body.title;
   const content = req.body.content;
   let creator;
@@ -61,6 +71,88 @@ exports.createPost = (req, res, next) => {
           _id: creator._id,
           name: creator.name,
         },
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.getSinglePost = (req, res, next) => {
+  const feedId = req.params.postId;
+  feedModel
+    .findById(feedId)
+    .populate("creator", ["name", "email"])
+    .then((feed) => {
+      if (!feed) {
+        const error = new Error("Feed does not exist");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      res.status(200).json({
+        message: "Feeds fetched succesfully",
+        feed: feed,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.deletePost = (req, res, next) => {
+  const feedId = req.params.postId;
+
+  feedModel
+    .findByIdAndRemove(feedId)
+    .then(() => {
+      res.status(200).json({
+        message: "Feed is deleted succesfully",
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.updatePost = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+
+  const title = req.body.title;
+  const content = req.body.content;
+
+  const feedId = req.params.postId;
+  feedModel
+    .findById(feedId)
+    .then((feed) => {
+      if (!feed) {
+        const error = new Error("Feed does not exist");
+        error.statusCode = 404;
+        throw error;
+      }
+      feed.title = title;
+      feed.content = content;
+      return feed.save();
+    })
+    .then((feed) => {
+      res.status(200).json({
+        message: "feed are updated succesfully",
+        feed: feed,
       });
     })
     .catch((err) => {
